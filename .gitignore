@@ -1,6 +1,7 @@
 *.swp
 .webassets*
 *.py[co]
+madacra_server.log
 
 # Packages
 *.egg
