@@ -12,5 +12,5 @@ SECRET_KEY = '2gfOb@tiNQ;d5Mla[HKWMlTfgge.0Cjp'
 LOG_FILENAME = "madacra_server.log"
 SOCKETIO_NAMESPACE = "madacra"
 MONGODB_SETTINGS = {
-        "db": "madacra",
+        "DB": "madacra",
         }
