@@ -2,7 +2,7 @@ Flask
 Flask-Script
 Flask-Assets
 Flask-Principal
-Flask-Zen
-Flask-mongoengine
+Flask-pymongo
 cssmin
 gevent-socketio
+pyjade
