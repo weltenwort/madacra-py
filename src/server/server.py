@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 from flask import current_app
 from flask.ext.script import Command, Option
 from socketio.server import SocketIOServer

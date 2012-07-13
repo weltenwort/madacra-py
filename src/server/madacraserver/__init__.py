@@ -1,4 +1,4 @@
-# -*- encoding:utf-8 -*-
+# vim: set fileencoding=utf-8 :
 import logging
 from logging.handlers import WatchedFileHandler
 
@@ -6,13 +6,16 @@ from flask import Flask
 from flask.ext.assets import Environment, Bundle
 
 
-def create_app():
-    from db import db
+def create_app(config_filename=None):
+    from db import db_manager
     #from server.login import login_manager
 
     app = Flask(__name__, instance_relative_config=True)
+    app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
 
     app.config.from_pyfile("default_settings.py")
+    if config_filename is not None:
+        app.config.from_pyfile(config_filename)
     app.config.from_envvar('MADACRA_SERVER_SETTINGS', silent=True)
 
     if not app.debug:
@@ -51,7 +54,7 @@ def create_app():
     assets.register("css_lib", css_lib_assets)
     assets.register("css_app", css_app_assets)
 
-    db.init_app(app)
+    db_manager.init_app(app)
     #login_manager.setup_app(app)
 
     #app.register_blueprint(blueprint_frontend)

@@ -2,39 +2,55 @@
 import hashlib
 import os
 
-from . import db
+from . import db_manager
 
 
-class User(db.Document):
-    """User model."""
-    username = db.StringField(required=True, unique=True)
-    _password = db.StringField(db_field="password", required=True)
+class UserManager(db_manager.CollectionManager):
+    name = "user"
+    indices = [
+            db_manager.CollectionIndex("username"),
+            ]
 
-    @property
-    def password(self):
-        return self._password
-
-    @password.setter
-    def set_password(self, password):
-        h = hashlib.sha256()
-        h.update(os.urandom(256))
-        salt = h.hexdigest()
-        self._password = salt + self._hash_password(password, salt=salt)
-
-    @property
-    def salt(self):
-        return self._password[:64]
-
-    def _hash_password(self, password, salt=None):
+    def hash_password(self, password, salt=None):
         if salt is None:
-            salt = self.salt
+            h = hashlib.sha256()
+            h.update(os.urandom(256))
+            salt = h.hexdigest()
         h = hashlib.sha256()
         h.update(salt)
         h.update(password)
-        return h.hexdigest()
+        return salt + h.hexdigest()
 
-    def check_password(self, password):
-        return self.salt + self._hash_password(password) == self._password
+    def check_passwords(self, password, hashed_password):
+        return self.hash_password(password, hashed_password[:64]) == hashed_password
 
-    def get_id(self):
-        return self.id
+userManager = UserManager()
+
+#class User(Document):
+    #"""User model."""
+    #username = fields.StringField(required=True)
+    #password = fields.StringField(required=True)
+
+    #def set_password(self, password):
+        #h = hashlib.sha256()
+        #h.update(os.urandom(256))
+        #salt = h.hexdigest()
+        #self.password = salt + self._hash_password(password, salt=salt)
+
+    #@property
+    #def salt(self):
+        #return self.password[:64]
+
+    #def _hash_password(self, password, salt=None):
+        #if salt is None:
+            #salt = self.salt
+        #h = hashlib.sha256()
+        #h.update(salt)
+        #h.update(password)
+        #return h.hexdigest()
+
+    #def check_password(self, password):
+        #return self.salt + self._hash_password(password) == self.password
+
+    #def get_id(self):
+        #return self.id

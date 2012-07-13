@@ -1,4 +1,4 @@
-# -*- encoding:utf-8 -*-
+# vim: set fileencoding=utf-8 :
 import os
 
 base_path = os.path.dirname(__file__)
@@ -11,6 +11,5 @@ ASSETS_AUTO_BUILD = False
 SECRET_KEY = '2gfOb@tiNQ;d5Mla[HKWMlTfgge.0Cjp'
 LOG_FILENAME = "madacra_server.log"
 SOCKETIO_NAMESPACE = "madacra"
-MONGODB_SETTINGS = {
-        "DB": "madacra",
-        }
+MONGO_HOST = "localhost"
+MONGO_DBNAME = "madacra"

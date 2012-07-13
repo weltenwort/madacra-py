@@ -1,3 +1,4 @@
-from flask.ext.mongoengine import MongoEngine
+# vim: set fileencoding=utf-8 :
+from .manager import MongoManager
 
-db = MongoEngine()
+db_manager = MongoManager()
