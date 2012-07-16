@@ -1,9 +1,9 @@
 from gevent import monkey
-monkey.patch_all()
+monkey.patch_all(select=False)
 
-from flask import current_app
 from flask.ext.script import Command, Option
 from socketio.server import SocketIOServer
+import werkzeug.serving
 
 
 class RunSocketIOServer(Command):
@@ -19,12 +19,13 @@ class RunSocketIOServer(Command):
 
         return options
 
-    def run(self, host, port):
-        app = current_app
-        server = SocketIOServer(
-                (host, port),
-                app,
-                namespace=app.config["SOCKETIO_NAMESPACE"],
-                policy_server=False
-                )
-        server.serve_forever()
+    def handle(self, app, host, port):
+        @werkzeug.serving.run_with_reloader
+        def foo():
+            server = SocketIOServer(
+                    (host, port),
+                    app,
+                    namespace="socket.io",
+                    policy_server=False
+                    )
+            server.serve_forever()

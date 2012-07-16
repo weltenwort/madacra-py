@@ -6,3 +6,4 @@ Flask-pymongo
 cssmin
 gevent-socketio
 pyjade
+gevent_zeromq
