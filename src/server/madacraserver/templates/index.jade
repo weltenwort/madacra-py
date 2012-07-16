@@ -1,0 +1,15 @@
+doctype 5
+html(ng-app="madacra")
+  head
+    title Madacra
+    - assets "css_app"
+      link(rel="stylesheet", type="text/css", href=ASSET_URL)
+    - endassets
+    - assets "js_lib"
+      script(type="text/javascript", src=ASSET_URL)
+    - endassets
+    - assets "js_app"
+      script(type="text/javascript", src=ASSET_URL)
+    - endassets
+  body(ng-controller="MainController")
+    div foo
