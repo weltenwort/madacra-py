@@ -1,4 +1,5 @@
 # vim: set fileencoding=utf-8 :
+import collections
 import json
 import logging
 
@@ -30,14 +31,13 @@ class MessageHub(Greenlet):
         try:
             self.sender.start()
             self.sender.join()
-        except gevent.GreenletExit:
+        finally:
             self.sender.kill(block=True, timeout=10.0)
-            raise
 
     def send_message(self, topic, message):
         self.sender.queue_message(topic, message)
 
-    def get_receiver(self, topics=(), start=True):
+    def get_receiver(self, topics=(), start=False):
         receiver = MessageReceiver(
                 socket_address=self.socket_address,
                 topics=topics,
@@ -67,6 +67,8 @@ class MessageSender(Greenlet):
                     serialized_message = self.serializer.serialize(message)
                     self.socket.send_multipart((topic, serialized_message))
                 except gevent.GreenletExit:
+                    break
+                except KeyboardInterrupt:
                     break
                 except:
                     logging.exception("Sending with topic '{}' failed.".format(topic))
@@ -107,6 +109,8 @@ class MessageReceiver(Greenlet):
                     self.message_queue.put((topic, message))
                 except gevent.GreenletExit:
                     break
+                except KeyboardInterrupt:
+                    break
                 except:
                     logging.exception("Receiving failed.")
         finally:
@@ -121,3 +125,34 @@ class MessageReceiver(Greenlet):
             return self.message_queue.get(block=block, timeout=timeout)
         except Empty:
             return default
+
+
+class MessageReactor(Greenlet):
+    def __init__(self, receiver, start_receiver=True):
+        super(MessageReactor, self).__init__()
+        self.receiver = receiver
+        self.start_receiver = start_receiver
+        self.callbacks = collections.defaultdict(list)
+
+    def _run(self):
+        if self.start_receiver:
+            self.receiver.start()
+
+        try:
+            for topic, message in self.receiver.message_queue:
+                if topic in self.callbacks:
+                    for callback in self.callbacks[topic]:
+                        callback(topic, message)
+        finally:
+            if self.start_receiver:
+                self.receiver.kill()
+
+    def register_callback(self, topics, callback):
+        if isinstance(topics, basestring):
+            topics = [topics, ]
+
+        for topic in topics:
+            self.receiver.subscribe(topic)
+            self.callbacks[topic].append(callback)
+
+        return callback
