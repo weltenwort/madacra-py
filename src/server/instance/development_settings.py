@@ -4,6 +4,7 @@ import os
 base_path = os.path.dirname(__file__)
 
 DEBUG = True
+TESTING = True
 ASSETS_DEBUG = False
 ASSETS_CACHE = False
 ASSETS_MANIFEST = "file"

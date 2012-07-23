@@ -1,9 +1,9 @@
 Flask
 Flask-Script
 Flask-Assets
-Flask-Principal
 Flask-pymongo
 cssmin
 gevent-socketio
 pyjade
 gevent_zeromq
+itsdangerous

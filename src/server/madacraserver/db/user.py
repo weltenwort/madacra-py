@@ -2,6 +2,9 @@
 import hashlib
 import os
 
+from decotrace import traced
+from itsdangerous import Signer
+
 from . import db_manager
 
 
@@ -24,7 +27,28 @@ class UserManager(db_manager.CollectionManager):
     def check_passwords(self, password, hashed_password):
         return self.hash_password(password, hashed_password[:64]) == hashed_password
 
-userManager = UserManager()
+    @traced
+    def check_login(self, username, password):
+        user = self.collection.find_one({"username": username})
+        if user is not None and self.check_passwords(password, user["password"]):
+            return str(user["_id"])
+        else:
+            return None
+
+    @property
+    def signer(self):
+        if getattr(self, "_signer", None) is None:
+            self._signer = Signer(self.manager.app.config["SECRET_KEY"])
+        return self._signer
+
+    def parse_identity_cookie(self, identity_cookie):
+        return self.signer.unsign(identity_cookie)
+
+    def create_identity_cookie(self, user_id):
+        return self.signer.sign(user_id)
+
+
+user_manager = UserManager()
 
 #class User(Document):
     #"""User model."""

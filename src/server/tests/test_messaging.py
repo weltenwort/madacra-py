@@ -5,7 +5,7 @@ import gevent
 from gevent_zeromq import zmq
 from mock import MagicMock
 
-from madacraserver.messaging import (
+from madacraserver.utils.messaging import (
         MessageHub,
         MessageReactor,
         )
