@@ -1,12 +1,12 @@
-app = angular.module "madacra", ["madacra.identity"]
+app = angular.module "madacra", ["madacra.identity", "madacra.campaigns"]
 
 app.config ($interpolateProvider, $routeProvider) ->
     $interpolateProvider.startSymbol("{+")
     $interpolateProvider.endSymbol("+}")
 
     $routeProvider.when "/",
-        templateUrl: "/partials/login"
-        controller: "LoginController"
+        templateUrl: "/partials/campaign_list"
+        controller: "CampaignListController"
     $routeProvider.when "/login",
         templateUrl: "/partials/login"
         controller: "LoginController"

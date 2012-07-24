@@ -9,6 +9,7 @@ from flask.ext.assets import Environment, Bundle
 def create_app(config_filename=None):
     from db import db_manager
     from messaging import message_hub
+    import db.campaign # noqa
     #from authentication import login_manager
 
     app = Flask(__name__, instance_relative_config=True)
