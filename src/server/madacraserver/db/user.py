@@ -27,7 +27,6 @@ class UserManager(db_manager.CollectionManager):
     def check_passwords(self, password, hashed_password):
         return self.hash_password(password, hashed_password[:64]) == hashed_password
 
-    @traced
     def check_login(self, username, password):
         user = self.collection.find_one({"username": username})
         if user is not None and self.check_passwords(password, user["password"]):

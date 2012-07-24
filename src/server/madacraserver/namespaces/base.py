@@ -11,3 +11,7 @@ class MadacraNamespace(BaseNamespace):
     def process_packet(self, packet):
         with self.request.app_context():
             return super(MadacraNamespace, self).process_packet(packet)
+
+    def add_job(self, job):
+        self.jobs.append(job)
+        return job

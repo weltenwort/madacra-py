@@ -4865,6 +4865,82 @@ window.jasmine && (function(window) {
   }
 })(window);
 
+describe("the $waitOnce method on the root scope", function() {
+  beforeEach(function() {
+    return module("madacra");
+  });
+  it("exists", inject(function($rootScope) {
+    return expect($rootScope.$waitOnce).toBeDefined();
+  }));
+  it("resolves its promise correctly when given a list of events", inject(function($rootScope) {
+    var done, p;
+    done = false;
+    p = $rootScope.$waitOnce(0, ["fooEvent"]);
+    p.then(function(result) {
+      return done = result.event === "fooEvent";
+    });
+    $rootScope.$broadcast("fooEvent", {
+      key: "value"
+    });
+    $rootScope.$digest();
+    return waitsFor(function() {
+      return done;
+    }, "the $waitOnce promise to be resolved", 1000);
+  }));
+  it("resolves its promise correctly when given a mapping of events", inject(function($rootScope) {
+    var done, p;
+    done = false;
+    p = $rootScope.$waitOnce(0, {
+      fooEvent: true
+    });
+    p.then(function(result) {
+      return done = result.event === "fooEvent";
+    }, function(result) {
+      return done = false;
+    });
+    $rootScope.$broadcast("fooEvent", {
+      key: "value"
+    });
+    $rootScope.$digest();
+    return waitsFor(function() {
+      return done;
+    }, "the $waitOnce promise to be resolved", 1000);
+  }));
+  it("rejects its promise correctly when given a mapping of events", inject(function($rootScope) {
+    var done, p;
+    done = false;
+    p = $rootScope.$waitOnce(0, {
+      fooEvent: false
+    });
+    p.then(function(result) {
+      return done = false;
+    }, function(result) {
+      return done = result.event === "fooEvent";
+    });
+    $rootScope.$broadcast("fooEvent", {
+      key: "value"
+    });
+    $rootScope.$digest();
+    return waitsFor(function() {
+      return done;
+    }, "the $waitOnce promise to be rejected", 1000);
+  }));
+  return it("times out correctly", inject(function($rootScope, $timeout) {
+    var done, p;
+    done = false;
+    p = $rootScope.$waitOnce(1000, ["fooEvent"]);
+    p.then(function(result) {
+      return done = false;
+    }, function(result) {
+      return done = result.event === "timeout";
+    });
+    $timeout.flush();
+    return waitsFor(function() {
+      return done;
+    }, "the $waitOnce promise to time out correctly", 2000);
+  }));
+});
+
 describe("the identity service", function() {
   beforeEach(function() {
     return module("madacra.identity");

@@ -102,6 +102,10 @@ def create_app(config_filename=None):
 
         from views.tests import tests_blueprint
         app.register_blueprint(tests_blueprint, url_prefix="/tests")
+
+        from messaging import MessageDebugLogger
+        message_logger = MessageDebugLogger.from_hub(message_hub, logger=app.logger)
+        message_logger.start()
     #app.register_blueprint(blueprint_frontend)
     #app.register_blueprint(blueprint_entry, url_prefix="/entry")
     #app.register_blueprint(blueprint_filter, url_prefix="/filter")

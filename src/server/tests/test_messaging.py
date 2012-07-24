@@ -7,6 +7,7 @@ from mock import MagicMock
 
 from madacraserver.utils.messaging import (
         MessageHub,
+        MessageQueue,
         MessageReactor,
         )
 
@@ -21,33 +22,35 @@ class MessagingTest(TestCase):
     def test_messaging(self):
         hub = MessageHub(context=self.context)
         hub.start()
-        receiver = hub.get_receiver(topics=["A", ], start=True)
+        queue = MessageQueue.from_hub(hub, topics=["A", ])
+        queue.start()
 
         hub.send_message("A", {"a": 1})
-        self.assertEqual(receiver.get_message(timeout=10), ("A", {"a": 1}))
+        self.assertEqual(queue.get_message(timeout=10), ("A", {"a": 1}))
 
+        queue.kill(block=True, timeout=10)
         hub.kill(block=True, timeout=10)
-        receiver.kill(block=True, timeout=10)
 
     def test_subscriptions(self):
         hub = MessageHub(context=self.context)
         hub.start()
-        receiver = hub.get_receiver(topics=["A", ], start=True)
-        receiver.subscribe("B")
+        queue = MessageQueue.from_hub(hub, topics=["A", ])
+        queue.start()
+        queue.subscribe("B")
 
         hub.send_message("B", {"b": 1})
         hub.send_message("C", {"c": 1})
         hub.send_message("A", {"a": 1})
-        self.assertEqual(receiver.get_message(timeout=10), ("B", {"b": 1}))
-        self.assertEqual(receiver.get_message(timeout=10), ("A", {"a": 1}))
+        self.assertEqual(queue.get_message(timeout=10), ("B", {"b": 1}))
+        self.assertEqual(queue.get_message(timeout=10), ("A", {"a": 1}))
 
-        receiver.kill(block=True, timeout=10)
+        queue.kill(block=True, timeout=10)
         hub.kill(block=True, timeout=10)
 
     def test_reactor(self):
         hub = MessageHub(context=self.context)
         hub.start()
-        reactor = MessageReactor(hub.get_receiver())
+        reactor = MessageReactor.from_hub(hub)
         reactor.start()
 
         callback = MagicMock()

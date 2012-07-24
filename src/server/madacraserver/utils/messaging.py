@@ -18,12 +18,14 @@ class JsonSerializer(object):
 
 
 class MessageHub(Greenlet):
-    def __init__(self, socket_address="inproc://messages", context=None):
+    def __init__(self, socket_address="inproc://messages", serializer=None, context=None):
         super(MessageHub, self).__init__()
         self.socket_address = socket_address
+        self.serializer = serializer or JsonSerializer()
         self.context = context or zmq.Context.instance()
         self.sender = MessageSender(
                 socket_address=self.socket_address,
+                serializer=self.serializer,
                 context=self.context,
                 )
 
@@ -36,16 +38,6 @@ class MessageHub(Greenlet):
 
     def send_message(self, topic, message):
         self.sender.queue_message(topic, message)
-
-    def get_receiver(self, topics=(), start=False):
-        receiver = MessageReceiver(
-                socket_address=self.socket_address,
-                topics=topics,
-                context=self.context,
-                )
-        if start:
-            receiver.start()
-        return receiver
 
 
 class MessageSender(Greenlet):
@@ -86,11 +78,20 @@ class MessageReceiver(Greenlet):
         self.topics = set(topics)
         self.serializer = serializer or JsonSerializer()
         self.context = context or zmq.Context.instance()
-        self.message_queue = Queue()
         self.socket = self.context.socket(zmq.SUB)
 
         for topic in self.topics:
             self.subscribe(topic)
+
+    @classmethod
+    def from_hub(cls, message_hub, topics=(), **kwargs):
+        return cls(
+                socket_address=message_hub.socket_address,
+                topics=topics,
+                serializer=message_hub.serializer,
+                context=message_hub.context,
+                **kwargs
+                )
 
     def _run(self):
         while True:
@@ -106,7 +107,7 @@ class MessageReceiver(Greenlet):
                 try:
                     topic, serialized_message = self.socket.recv_multipart()
                     message = self.serializer.deserialize(serialized_message)
-                    self.message_queue.put((topic, message))
+                    self._process_message(topic, message)
                 except gevent.GreenletExit:
                     break
                 except KeyboardInterrupt:
@@ -116,9 +117,22 @@ class MessageReceiver(Greenlet):
         finally:
             self.socket.close()
 
+    def _process_message(self, topic, message):
+        """Processes a message. Override in subclasses."""
+        pass
+
     def subscribe(self, topic):
         self.topics.add(topic)
         self.socket.setsockopt(zmq.SUBSCRIBE, topic)
+
+
+class MessageQueue(MessageReceiver):
+    def __init__(self, *args, **kwargs):
+        super(MessageQueue, self).__init__(*args, **kwargs)
+        self.message_queue = Queue()
+
+    def _process_message(self, topic, message):
+        self.message_queue.put((topic, message))
 
     def get_message(self, block=True, timeout=None, default=None):
         try:
@@ -127,32 +141,36 @@ class MessageReceiver(Greenlet):
             return default
 
 
-class MessageReactor(Greenlet):
-    def __init__(self, receiver, start_receiver=True):
-        super(MessageReactor, self).__init__()
-        self.receiver = receiver
-        self.start_receiver = start_receiver
+class MessageReactor(MessageReceiver):
+    def __init__(self, *args, **kwargs):
+        super(MessageReactor, self).__init__(*args, **kwargs)
         self.callbacks = collections.defaultdict(list)
 
-    def _run(self):
-        if self.start_receiver:
-            self.receiver.start()
-
-        try:
-            for topic, message in self.receiver.message_queue:
-                if topic in self.callbacks:
-                    for callback in self.callbacks[topic]:
-                        callback(topic, message)
-        finally:
-            if self.start_receiver:
-                self.receiver.kill()
+    def _process_message(self, topic, message):
+        if topic in self.callbacks:
+            for callback in self.callbacks[topic]:
+                callback(topic, message)
 
     def register_callback(self, topics, callback):
         if isinstance(topics, basestring):
             topics = [topics, ]
 
         for topic in topics:
-            self.receiver.subscribe(topic)
+            self.subscribe(topic)
             self.callbacks[topic].append(callback)
 
         return callback
+
+
+class MessageDebugLogger(MessageReceiver):
+    def __init__(self, *args, **kwargs):
+        if "logger" in kwargs:
+            self.logger = kwargs["logger"]
+            del kwargs["logger"]
+        else:
+            self.logger = logging.getLogger()
+        super(MessageDebugLogger, self).__init__(*args, **kwargs)
+        self.subscribe("")
+
+    def _process_message(self, topic, message):
+        self.logger.debug("[{}] {}".format(topic, message))

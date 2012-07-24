@@ -14,4 +14,5 @@ html(ng-app="madacra")
         script(type="text/javascript", src=ASSET_URL)
       - endassets
   body(ng-controller="MainController")
-    div foo
+    include partials/login.jade
+    div(ng-view)
