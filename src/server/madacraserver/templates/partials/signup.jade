@@ -1,0 +1,24 @@
+script(type="text/ng-template", id="/partials/signup")
+  .container
+    .row
+      .span6
+        div Please provide some information to sign up:
+        form.login-form(ng-submit="signup()")
+          .row
+            .span2
+              label Username
+            .span4
+              input(type="text", ng-model="signupUsername")
+          .row
+            .span2
+              label Password
+            .span4
+              input(type="password", ng-model="signupPassword")
+          .row
+            .span2
+              label Password Confirmation
+            .span4
+              input(type="password", ng-model="signupPasswordConfirmation")
+          .row
+            .offset2.span4
+              input.btn-success(type="submit", value="Sign Up")

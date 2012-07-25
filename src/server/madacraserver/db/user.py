@@ -34,6 +34,15 @@ class UserManager(db_manager.CollectionManager):
         else:
             return None
 
+    def create_user(self, username, password):
+        if self.collection.find({"username": username}).count() == 0:
+            return str(self.collection.insert({
+                "username": username,
+                "password": self.hash_password(password),
+                }))
+        else:
+            return None
+
     @property
     def signer(self):
         if getattr(self, "_signer", None) is None:

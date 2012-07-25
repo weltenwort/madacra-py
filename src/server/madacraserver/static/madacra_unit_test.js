@@ -4945,11 +4945,47 @@ describe("the identity service", function() {
   beforeEach(function() {
     return module("madacra.identity");
   });
-  return it("can authenticate", inject(function(identity) {
-    expect(identity.authenticate).toBeDefined();
-    identity.authenticate("user1", "password1");
+  it("can log in and log out", inject(function(identity) {
+    expect(identity.logIn).toBeDefined();
+    expect(identity.logOut).toBeDefined();
+    identity.logIn("user1", "password1");
+    waitsFor(function() {
+      return identity.token != null;
+    }, "identity token to be set after successful login", 1000);
+    runs(function() {
+      return identity.logOut();
+    });
+    return waitsFor(function() {
+      return identity.token === null;
+    }, "identity token to be null after successful logout", 1000);
+  }));
+  it("can fail to log in", inject(function($rootScope, identity) {
+    var done;
+    done = false;
+    identity.logIn("user1", "password2");
+    $rootScope.$on("/identity:loginFailed", function() {
+      return done = true;
+    });
+    return waitsFor(function() {
+      return done;
+    }, "loginFailed event from server", 1000);
+  }));
+  it("can sign up", inject(function(identity) {
+    expect(identity.signUp).toBeDefined();
+    identity.signUp("testuser" + (Date.now()), "testpassword");
     return waitsFor(function() {
       return identity.token != null;
-    }, "identity token is not set after server response", 1000);
+    }, "identity token to be set after successful signup", 1000);
+  }));
+  return it("can fail to sign up", inject(function($rootScope, identity) {
+    var done;
+    done = false;
+    identity.signUp("user1", "testpassword");
+    $rootScope.$on("/identity:signupFailed", function() {
+      return done = true;
+    });
+    return waitsFor(function() {
+      return done;
+    }, "signupFailed event from server", 1000);
   }));
 });
