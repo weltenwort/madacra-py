@@ -1,4 +1,4 @@
-module = angular.module "madacra.identity", ["madacra.socketio"]
+module = angular.module "madacra.identity", ["madacra.socketio", "controls.tooltip", "controls.validators"]
 
 loggedInPromise = ($q, identity) ->
     result = $q.defer()
@@ -48,29 +48,34 @@ module.controller "LoginController", ($scope, $rootScope, $route, $location, ide
     $scope.loginUsername = ""
     $scope.loginPassword = ""
     $scope.loggingIn = false
+    $scope.serverError = null
 
     $scope.login = ->
         $scope.loggingIn = true
-        destination = $location.search().destination
+        destination = $location.search().destination || "/"
         identity.logIn($scope.loginUsername, $scope.loginPassword)
         p = $rootScope.$waitOnce 10000,
             "/identity:loginSuccessful": true
             "/identity:loginFailed": false
         
         p.then ->
+            $scope.serverError = null
             $scope.loggingIn = false
-            if destination?
-                $location.url(destination)
-            else
-                $route.reload()
-        , ->
+            $location.url(destination)
+        , (data) ->
+            switch data.event
+                when "/identity:loginFailed"
+                    $scope.serverError = data.arguments?[0]
+                else
+                    $scope.serverError = data.event
             $scope.loggingIn = false
-            console.log "fail"
 
 module.controller "SignupController", ($scope, $rootScope, $location, identity) ->
     $scope.signupUsername = ""
     $scope.signupPassword = ""
+    $scope.signupPasswordConfirmation = ""
     $scope.signingUp = false
+    $scope.serverError = null
 
     $scope.signup = ->
         $scope.signingUp = true
@@ -80,8 +85,13 @@ module.controller "SignupController", ($scope, $rootScope, $location, identity) 
             "/identity:signupFailed": false
         
         p.then ->
+            $scope.serverError = null
             $scope.signingUp = false
             $location.url("/")
-        , ->
+        , (data) ->
+            switch data.event
+                when "/identity:signupFailed"
+                    $scope.serverError = data.arguments?[0]
+                else
+                    $scope.serverError = data.event
             $scope.signingUp = false
-            console.log "fail"

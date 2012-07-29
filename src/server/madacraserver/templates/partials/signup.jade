@@ -1,24 +1,29 @@
 script(type="text/ng-template", id="/partials/signup")
-  .container
+  .container.page-view
     .row
-      .span6
-        div Please provide some information to sign up:
-        form.login-form(ng-submit="signup()")
-          .row
-            .span2
-              label Username
-            .span4
-              input(type="text", ng-model="signupUsername")
-          .row
-            .span2
-              label Password
-            .span4
-              input(type="password", ng-model="signupPassword")
-          .row
-            .span2
-              label Password Confirmation
-            .span4
-              input(type="password", ng-model="signupPasswordConfirmation")
-          .row
-            .offset2.span4
-              input.btn-success(type="submit", value="Sign Up")
+      .span4.offset4
+        .dialog
+          form.no-layout.signup-form(ng-submit="signup()", name="signupForm")
+            .dialog-content
+              .dialog-title 
+                span Sign Up
+                .pull-right.small-title
+                  | Already registered?
+                  a(href="#/login") Log In
+              .input-prepend.control-group(ng-class="{error: signupForm.signupUsername.$invalid}")
+                span.add-on
+                  i.icon-user
+                input(type="text", name="signupUsername", ng-model="signupUsername", placeholder="username", required, ng-minlength="2", external-errors="{invalid:serverError.reason == 'invalidUsername' && serverError.username == signupUsername}")
+                span(tooltip="The username is not available.", tooltip-placement="right", tooltip-trigger="signupForm.signupUsername.$error.invalid")
+                span(tooltip="Please enter a username of at least 2 characters.", tooltip-placement="right", tooltip-trigger="signupForm.signupUsername.$error.minlength")
+              .input-prepend.control-group(ng-class="{error: signupForm.signupPassword.$invalid}")
+                span.add-on
+                  i.icon-key
+                input(type="password", name="signupPassword", ng-model="signupPassword", placeholder="password", required, ng-minlength="8")
+                span(tooltip="Please enter a password of at least 8 characters.", tooltip-placement="right", tooltip-trigger="signupForm.signupPassword.$error.minlength")
+              .input-prepend.control-group(ng-class="{error: signupForm.signupPasswordConfirmation.$invalid}")
+                span.add-on
+                  i.icon-key
+                input(type="password", name="signupPasswordConfirmation", ng-model="signupPasswordConfirmation", equal-to="signupPassword", placeholder="repeat password", tooltip="Please enter the above password again.", tooltip-placement="right", tooltip-trigger="signupForm.signupPasswordConfirmation.$invalid")
+            .dialog-actions.right
+              button.btn.btn-success(type="submit", ng-disabled="signupForm.$invalid", ng-class="{disabled:signupForm.$invalid}") Sign Up

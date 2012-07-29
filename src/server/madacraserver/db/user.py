@@ -30,16 +30,16 @@ class UserManager(db_manager.CollectionManager):
     def check_login(self, username, password):
         user = self.collection.find_one({"username": username})
         if user is not None and self.check_passwords(password, user["password"]):
-            return str(user["_id"])
+            return user["_id"]
         else:
             return None
 
     def create_user(self, username, password):
         if self.collection.find({"username": username}).count() == 0:
-            return str(self.collection.insert({
+            return self.collection.insert({
                 "username": username,
                 "password": self.hash_password(password),
-                }))
+                })
         else:
             return None
 
@@ -53,7 +53,7 @@ class UserManager(db_manager.CollectionManager):
         return self.signer.unsign(identity_cookie)
 
     def create_identity_cookie(self, user_id):
-        return self.signer.sign(user_id)
+        return self.signer.sign(str(user_id))
 
 
 user_manager = UserManager()

@@ -18,20 +18,20 @@ class IdentityNamespace(MadacraNamespace):
         self.reactor.start()
 
     def login_user(self, user_id):
-        self.session["user_id"] = user_id
+        self.user_id = user_id
         message_hub.send_message("identity:loginSuccessful:{}".format(user_id), {
-            "user_id": user_id,
+            "user_id": str(user_id),
             })
         self.emit("loginSuccessful", {
             "token": user_manager.create_identity_cookie(user_id),
             })
 
     def logout_user(self):
-        old_user_id = self.session["user_id"]
-        self.session["user_id"] = None
+        old_user_id = self.user_id
+        self.user_id = None
         if old_user_id is not None:
             message_hub.send_message("identity:logoutSuccessful:{}".format(old_user_id), {
-                "user_id": old_user_id,
+                "user_id": str(old_user_id),
                 })
             self.emit("logoutSuccessful", {})
 
@@ -59,6 +59,8 @@ class IdentityNamespace(MadacraNamespace):
                 })
             self.emit("loginFailed", {
                 "reason": "invalidCredentials",
+                "username": safe_data["username"],
+                "password": safe_data["password"],
                 })
 
     def on_logout(self, data):
@@ -81,7 +83,7 @@ class IdentityNamespace(MadacraNamespace):
 
         if user_id is not None:
             message_hub.send_message("identity:signupSuccessful:{}".format(user_id), {
-                "user_id": user_id,
+                "user_id": str(user_id),
                 "username": safe_data["username"],
                 })
             self.login_user(user_id)
@@ -92,4 +94,5 @@ class IdentityNamespace(MadacraNamespace):
                 })
             self.emit("signupFailed", {
                 "reason": "invalidUsername",
+                "username": safe_data["username"],
                 })

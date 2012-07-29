@@ -30,7 +30,7 @@ def create_app(config_filename=None):
     js_lib_assets = Bundle(
             "scripts/jquery-1.7.2.min.js",
             #"scripts/jquery-ui-1.8.16.custom.min.js",
-            #"scripts/bootstrap.min.js",
+            "scripts/bootstrap.js",
             "scripts/angular-1.0.1.min.js",
             "scripts/sugar-1.2.5.min.js",
             "scripts/socket.io.min.js",
@@ -39,6 +39,7 @@ def create_app(config_filename=None):
             )
     js_app_assets = Bundle(
             "lib/*.coffee",
+            "lib/controls/*.coffee",
             filters=["coffeescript", "rjsmin"],
             output="madacra_app.js",
             )
@@ -74,6 +75,11 @@ def create_app(config_filename=None):
             #)
     css_app_assets = Bundle(
             "stylesheets/madacra.less",
+            depends=[
+                "stylesheets/colors.less",
+                "stylesheets/controls.less",
+                "stylesheets/utils.less",
+                ],
             filters=["less", "cssmin"],
             output="madacra_app.css",
             )

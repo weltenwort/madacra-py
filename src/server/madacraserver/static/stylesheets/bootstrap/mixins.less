@@ -609,6 +609,7 @@
 
     .spanX (@index) when (@index > 0) {
       (~"input.span@{index}, textarea.span@{index}, .uneditable-input.span@{index}") { .span(@index); }
+      /*(~".input-prepend input.span@{index}, .input-prepend textarea.span@{index}, .input-prepend .uneditable-input.span@{index}") { .span-prepended(@index); }*/
       .spanX(@index - 1);
     }
     .spanX (0) {}
@@ -616,6 +617,10 @@
     .span(@columns) {
       width: ((@gridColumnWidth) * @columns) + (@gridGutterWidth * (@columns - 1)) - 10;
     }
+
+    /*.span-prepended(@columns) {*/
+      /*width: ((@gridColumnWidth) * @columns) + (@gridGutterWidth * (@columns - 1)) - 10 - 28 - 100;*/
+    /*}*/
 
     input,
     textarea,

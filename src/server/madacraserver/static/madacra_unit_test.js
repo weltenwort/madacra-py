@@ -4865,6 +4865,28 @@ window.jasmine && (function(window) {
   }
 })(window);
 
+describe("the campaign service", function() {
+  beforeEach(function() {
+    module("madacra.campaign");
+    return module("madacra.identity");
+  });
+  return it("can enumerate campaigns after login", inject(function(campaign, identity) {
+    runs(function() {
+      expect(campaign.enumerate).toBeDefined();
+      return identity.logIn("user1", "password1");
+    });
+    waitsFor(function() {
+      return identity.token != null;
+    }, "identity token to be set after successful login", 1000);
+    runs(function() {
+      return campaign.enumerate();
+    });
+    return waitsFor(function() {
+      return Object.keys(campaign.campaigns).length > 0;
+    }, "campaigns to be stored after they have been sent by the server", 1000);
+  }));
+});
+
 describe("the $waitOnce method on the root scope", function() {
   beforeEach(function() {
     return module("madacra");

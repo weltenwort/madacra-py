@@ -5,9 +5,11 @@ from flask import (
         request,
         )
 from socketio import socketio_manage
-from socketio.namespace import BaseNamespace
 
-from ..namespaces import identity
+from ..namespaces import (
+        identity,
+        campaign,
+        )
 
 socketio_blueprint = Blueprint("socketio", __name__)
 
@@ -15,7 +17,8 @@ socketio_blueprint = Blueprint("socketio", __name__)
 @socketio_blueprint.route("/<path:path>")
 def view_socketio(path):
     socketio_manage(request.environ, {
-        "/identity": identity.IdentityNamespace
+        "/identity": identity.IdentityNamespace,
+        "/campaign": campaign.CampaignNamespace,
         },
         request=current_app._get_current_object(),
         )

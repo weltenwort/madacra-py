@@ -1,0 +1,58 @@
+// vim: set ft=less fileencoding=utf-8 :
+
+@dialog-padding: 10px;
+
+.dialog {
+    .box-sizing(border-box);
+    border: 1px solid @color-ui-border;
+    border-bottom-color: rgb(202, 202, 202);
+    .box-shadow(0px 1px 4px 0px rgb(221, 221, 221));
+}
+
+.dialog-content {
+    padding: @dialog-padding;
+}
+
+.dialog-actions {
+    .box-sizing(border-box);
+    padding: @dialog-padding;
+    background: @color-ui-background-offset;
+    border-top: 1px solid @color-ui-border;
+
+    &.right {
+        text-align: right;
+    }
+}
+
+.dialog-title {
+    padding-bottom: 3px;
+    margin-bottom: @dialog-padding;
+    border-bottom: 1px solid @color-ui-border;
+    font-size: 1.5em;
+
+    .small-title {
+        font-size: 0.6em;
+    }
+}
+
+/*
+   Input states
+*/
+.float-tooltip {
+    .tooltip;
+    position: absolute;
+    right: -100%;
+}
+
+
+/*
+   Specific controls
+*/
+.login-form, .signup-form {
+    input[type="text"], input[type="password"] {
+        width: 238px;
+    }
+    .control-group {
+        position: relative;
+    }
+}

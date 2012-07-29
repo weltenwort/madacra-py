@@ -1,19 +1,24 @@
 script(type="text/ng-template", id="/partials/login")
-  .container
+  .container.page-view
     .row
-      .span6
-        div Please log in:
-        form.login-form(ng-submit="login()")
-          .row
-            .span2
-              label Username
-            .span4
-              input(type="text", ng-model="loginUsername")
-          .row
-            .span2
-              label Password
-            .span4
-              input(type="password", ng-model="loginPassword")
-          .row
-            .offset2.span4
-              input.btn-success(type="submit", value="Log in")
+      .span4.offset4
+        .dialog
+          form.no-layout.login-form(ng-submit="login()", name="loginForm")
+            .dialog-content
+              .dialog-title 
+                span Log in
+                .pull-right.small-title
+                  | Not yet registered?
+                  a(href="#/signup") Sign Up
+              .input-prepend.control-group(ng-class="{error: loginForm.loginUsername.$invalid}")
+                span.add-on
+                  i.icon-user
+                input(type="text", name="loginUsername", ng-model="loginUsername", placeholder="username")
+              .input-prepend.control-group(ng-class="{error: loginForm.loginPassword.$invalid}")
+                span.add-on
+                  i.icon-key
+                input(type="password", name="loginPassword", ng-model="loginPassword", placeholder="password", external-errors="{invalid:serverError.reason == 'invalidCredentials' && serverError.password == loginPassword}")
+                span(tooltip="Invalid password for that username.", tooltip-placement="right", tooltip-trigger="loginForm.loginPassword.$error.invalid")
+            .dialog-actions.right
+              button.btn.btn-success(type="submit", name="loginSubmit") Log In
+

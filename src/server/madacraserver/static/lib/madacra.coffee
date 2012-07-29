@@ -1,4 +1,4 @@
-app = angular.module "madacra", ["madacra.identity", "madacra.campaigns"]
+app = angular.module "madacra", ["madacra.identity", "madacra.campaign"]
 
 app.config ($interpolateProvider, $routeProvider) ->
     $interpolateProvider.startSymbol("{+")
@@ -7,9 +7,14 @@ app.config ($interpolateProvider, $routeProvider) ->
     $routeProvider.when "/",
         templateUrl: "/partials/campaign_list"
         controller: "CampaignListController"
+        resolve:
+            login: loggedInPromise
     $routeProvider.when "/login",
         templateUrl: "/partials/login"
         controller: "LoginController"
+    $routeProvider.when "/signup",
+        templateUrl: "/partials/signup"
+        controller: "SignupController"
     $routeProvider.when "/foo",
         templateUrl: "/partials/login"
         controller: "FooController"
