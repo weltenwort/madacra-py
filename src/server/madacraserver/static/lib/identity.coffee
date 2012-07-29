@@ -1,4 +1,4 @@
-module = angular.module "madacra.identity", ["madacra.socketio", "controls.tooltip", "controls.validators"]
+module = angular.module "madacra.identity", ["madacra.socketio", "controls.tooltip", "controls.validators", "ngCookies"]
 
 loggedInPromise = ($q, identity) ->
     result = $q.defer()
@@ -8,10 +8,10 @@ loggedInPromise = ($q, identity) ->
         result.reject("notLoggedIn")
     return result.promise
 
-module.factory "identity", ($rootScope, $q, $timeout, socket) ->
+module.factory "identity", ($rootScope, $q, $timeout, $cookieStore, socket) ->
     class IdentityService
         constructor: ->
-            @token = null
+            @token = @loadToken()
 
             socket.addEvents
                 "/identity": [
@@ -26,9 +26,27 @@ module.factory "identity", ($rootScope, $q, $timeout, socket) ->
 
             $rootScope.$on "/identity:loginSuccessful", (event, data) =>
                 @token = data.token
+                @storeToken(@token)
 
             $rootScope.$on "/identity:logoutSuccessful", (event, data) =>
                 @token = null
+                @removeToken()
+
+            # identify the client to the server if a token is present
+            if @token?
+                @identify(@token)
+
+        loadToken: ->
+            return $cookieStore.get("identityToken") ? null
+
+        storeToken: (token) ->
+            $cookieStore.put("identityToken", token)
+
+        removeToken: ->
+            $cookieStore.remove("identityToken")
+
+        identify: (token) ->
+            socket.emit("/identity", "identify", token: token)
 
         logIn: (username, password) ->
             socket.emit("/identity", "login", username: username, password: password)

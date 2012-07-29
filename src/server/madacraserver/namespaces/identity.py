@@ -1,7 +1,7 @@
 # vim: set fileencoding=utf-8 :
 import logging
 
-import trafaret as t
+import itsdangerous
 
 from base import MadacraNamespace
 from ..db.user import user_manager
@@ -9,6 +9,7 @@ from ..messaging import (
         message_hub,
         MessageReactor,
         )
+from ..utils import validation as t
 
 
 class IdentityNamespace(MadacraNamespace):
@@ -18,6 +19,8 @@ class IdentityNamespace(MadacraNamespace):
         self.reactor.start()
 
     def login_user(self, user_id):
+        """Store the current user_id in the session and emit the
+        loginSuccessful event to the client and message hub."""
         self.user_id = user_id
         message_hub.send_message("identity:loginSuccessful:{}".format(user_id), {
             "user_id": str(user_id),
@@ -27,6 +30,9 @@ class IdentityNamespace(MadacraNamespace):
             })
 
     def logout_user(self):
+        """Remove any refernce to the current user from the session. If the
+        user was logged in previously, emit the logoutSuccessful event to the
+        client and message hub."""
         old_user_id = self.user_id
         self.user_id = None
         if old_user_id is not None:
@@ -36,6 +42,17 @@ class IdentityNamespace(MadacraNamespace):
             self.emit("logoutSuccessful", {})
 
     def on_login(self, data):
+        """Sent by the client to request being logged in using username and
+        password.
+
+        Possible server responses:
+
+        loginSuccessful
+          sent when the user has been logged in successfully
+
+        loginFailed
+          sent when the user could not be loggen in successfully
+        """
         try:
             safe_data = t.Dict({
                 t.Key(u"username") >> "username": t.String,
@@ -64,9 +81,38 @@ class IdentityNamespace(MadacraNamespace):
                 })
 
     def on_logout(self, data):
+        """Sent by the client to request being logged out."""
         self.logout_user()
 
+    def on_identify(self, data):
+        """Sent by the client to request being logged in using an
+        authentication token."""
+        try:
+            safe_data = t.Dict({
+                t.Key(u"token") >> "token": t.String,
+                }).check(data)
+        except t.DataError:
+            self.emit("signupFailed", {
+                "reason": "invalidRequest"
+                })
+            logging.exception("Received invalid data: {}".format(data))
+            return
+
+        try:
+            user_id = t.ObjectId().check(user_manager.parse_identity_cookie(safe_data["token"]))
+            message_hub.send_message("identity:identificationSuccessful", {
+                "user_id": str(user_id),
+                })
+            self.login_user(user_id)
+        except itsdangerous.BadSignature:
+            message_hub.send_message("identity:identificationFailed", {})
+            self.emit("identificationFailed", {
+                "reason": "badSignature",
+                "token": safe_data["token"],
+                })
+
     def on_signup(self, data):
+        """Sent by the client to request creation of a new user account."""
         try:
             safe_data = t.Dict({
                 t.Key(u"username") >> "username": t.String,

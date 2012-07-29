@@ -30,11 +30,15 @@ def create_app(config_filename=None):
     js_lib_assets = Bundle(
             "scripts/jquery-1.7.2.min.js",
             #"scripts/jquery-ui-1.8.16.custom.min.js",
-            "scripts/bootstrap.js",
             "scripts/angular-1.0.1.min.js",
+            "scripts/angular-cookies-1.0.1.min.js",
             "scripts/sugar-1.2.5.min.js",
             "scripts/socket.io.min.js",
             #"scripts/jquery.couch.js",
+            Bundle(
+                "scripts/bootstrap.js",
+                filters=["rjsmin", ],
+                ),
             output="madacra_lib.js",
             )
     js_app_assets = Bundle(

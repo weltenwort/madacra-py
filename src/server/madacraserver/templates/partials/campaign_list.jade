@@ -1,4 +1,7 @@
 script(type="text/ng-template", id="/partials/campaign_list")
-  ul
-    li(ng-repeat="campaign in getCampaigns()")
-      a(ng-href="#/campaign/{+campaign._id+}") {+ campaign.name +}
+  .container.page-view
+    .row
+      .span12
+        ul
+          li(ng-repeat="campaign in getCampaigns()")
+            a(ng-href="#/campaign/{+campaign._id+}") {+ campaign.name +}
