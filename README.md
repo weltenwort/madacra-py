@@ -16,7 +16,7 @@ Setting up a development environment
 1. Create and activate a Python virtualenv for the project and install the dependcies in it using
 
     ```
-    $ pip install -r &lt;path-to-repository&gt;/src/server/requirements.txt
+    $ pip install -r <path-to-repository>/src/server/requirements.txt
     ```
 
 1. Inside &lt;path-to-repository&gt;/src/server/ start the watcher process that compiles assets when they are modified:
@@ -28,7 +28,7 @@ Setting up a development environment
 1. Inside &lt;path-to-repository&gt;/src/server/ start the server process with your desired configuration file (the path of which is relative to the instance folder):
 
     ```
-    $ MADACRA_SERVER_SETTINGS=&lt;settings-file&gt; python manage.py runserver
+    $ MADACRA_SERVER_SETTINGS=<settings-file> python manage.py runserver
     ```
 
 Testing mode
