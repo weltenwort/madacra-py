@@ -6,22 +6,29 @@ Setting up a development environment
 
 1. Clone this repository
 1. Install a mongodb server.
+1. Install nodejs.
+1. Install the `lesscss` and `coffee-script` compilers using npm:
+
+    ```
+    $ [sudo] npm install -g less coffee-script
+    ```
+
 1. Create and activate a Python virtualenv for the project and install the dependcies in it using
 
     ```
-    pip install -r &lt;path-to-repository&gt;/src/server/requirements.txt
+    $ pip install -r &lt;path-to-repository&gt;/src/server/requirements.txt
     ```
 
 1. Inside &lt;path-to-repository&gt;/src/server/ start the watcher process that compiles assets when they are modified:
 
     ```
-    python manage.py assets watch
+    $ python manage.py assets watch
     ```
 
 1. Inside &lt;path-to-repository&gt;/src/server/ start the server process with your desired configuration file (the path of which is relative to the instance folder):
 
     ```
-    MADACRA_SERVER_SETTINGS=&lt;settings-file&gt; python manage.py runserver
+    $ MADACRA_SERVER_SETTINGS=&lt;settings-file&gt; python manage.py runserver
     ```
 
 Testing mode
