@@ -2,11 +2,22 @@
 
 @dialog-padding: 10px;
 
-.dialog {
+.panel {
     .box-sizing(border-box);
     border: 1px solid @color-ui-border;
-    border-bottom-color: rgb(202, 202, 202);
+    border-bottom-color: @color-ui-border-accent;
     .box-shadow(0px 1px 4px 0px rgb(221, 221, 221));
+}
+
+.hover-panel {
+    &:hover {
+        background-color: @color-ui-border;
+        border-color: @color-ui-border-accent;
+    }
+}
+
+.dialog {
+    .panel;
 }
 
 .dialog-content {
@@ -35,6 +46,43 @@
     }
 }
 
+.folded-corner-se (@corner-color: @color-ui-border-accent){
+    position: relative;
+
+    &:before {
+       content: "";
+       position: absolute;
+       right: 0;
+       bottom: 0;
+       border-width: 10px 10px 0 0;
+       border-style: solid;
+       border-color: transparent @corner-color;
+    }    
+}
+
+.popup-container {
+    position: relative;
+    margin: 0;
+    padding: 0;
+
+    .popup-menu {
+        .panel;
+        list-style: none outside none;
+
+        a {
+            display: block;
+            padding: 3px 15px;
+            color: black;
+
+            &:hover {
+                text-decoration: none;
+                background-color: @color-ui-border;
+            }
+        }
+    }
+}
+
+
 /*
    Input states
 */
@@ -55,4 +103,23 @@
     .control-group {
         position: relative;
     }
+}
+
+.identity-indicator {
+    .panel;
+    .hover-panel;
+    .folded-corner-se;
+
+    padding: 5px;
+
+    i:first-child:after {
+        content: " ";
+    }
+}
+
+.identity-popup {
+    .popup-container .popup-menu;
+
+    position: absolute;
+    right: 0;
 }

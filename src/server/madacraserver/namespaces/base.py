@@ -7,12 +7,12 @@ class MadacraNamespace(BaseNamespace):
         super(MadacraNamespace, self).__init__(*args, **kwargs)
 
     @property
-    def user_id(self):
-        return self.session.get("user_id", None)
+    def user(self):
+        return self.session.get("user", None)
 
-    @user_id.setter # noqa
-    def user_id(self, value):
-        self.session["user_id"] = value
+    @user.setter # noqa
+    def user(self, value):
+        self.session["user"] = value
 
     def process_packet(self, packet):
         with self.request.app_context():

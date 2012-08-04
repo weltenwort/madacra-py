@@ -12,6 +12,7 @@ module.factory "identity", ($rootScope, $q, $timeout, $cookieStore, socket) ->
     class IdentityService
         constructor: ->
             @token = @loadToken()
+            @username = null
 
             socket.addEvents
                 "/identity": [
@@ -26,10 +27,12 @@ module.factory "identity", ($rootScope, $q, $timeout, $cookieStore, socket) ->
 
             $rootScope.$on "/identity:loginSuccessful", (event, data) =>
                 @token = data.token
+                @username = data.username
                 @storeToken(@token)
 
             $rootScope.$on "/identity:logoutSuccessful", (event, data) =>
                 @token = null
+                @username = null
                 @removeToken()
 
             # identify the client to the server if a token is present
@@ -113,3 +116,20 @@ module.controller "SignupController", ($scope, $rootScope, $location, identity) 
                 else
                     $scope.serverError = data.event
             $scope.signingUp = false
+
+module.controller "IdentityIndicatorController", ($scope, $location, identity) ->
+    #
+    # methods
+    #
+    $scope.getUsername = ->
+        identity.username
+
+    $scope.showIdentityPopup = (value) ->
+        $scope.identityPopupVisiblity = value
+
+    $scope.toggleIdentityPopup = ->
+        $scope.showIdentityPopup(not $scope.identityPopupVisiblity)
+
+    $scope.logOut = ->
+        identity.logOut()
+        $location.url("/login")

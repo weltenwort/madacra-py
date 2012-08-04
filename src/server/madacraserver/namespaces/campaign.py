@@ -15,8 +15,8 @@ class CampaignNamespace(MadacraNamespace):
         self.reactor.start()
 
     def on_enumerate(self, data):
-        if self.user_id:
-            campaigns = campaign_manager.enumerate_campaigns(self.user_id)
+        if self.user:
+            campaigns = campaign_manager.enumerate_campaigns(self.user["_id"])
             self.emit("enumerate", {
                 "campaigns": t.List(campaign_manager.json_schema).check(campaigns),
                 })

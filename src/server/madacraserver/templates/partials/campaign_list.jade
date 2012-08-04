@@ -1,6 +1,17 @@
 script(type="text/ng-template", id="/partials/campaign_list")
   .container.page-view
     .row
+      .span3.offset9(class="")
+        .popup-container(ng-controller="IdentityIndicatorController")
+          .identity-indicator(ng-click="toggleIdentityPopup()")
+            i.icon-user
+            span.identity-indicator-label {+ getUsername() +}
+          ul.identity-popup(ng-show="identityPopupVisiblity")
+            li
+              a(ng-click="showIdentityPopup(false); logOut()") 
+                i.icon-signout
+                span Log out
+    .row
       .span12
         ul
           li(ng-repeat="campaign in getCampaigns()")

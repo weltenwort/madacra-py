@@ -2,7 +2,7 @@
 import hashlib
 import os
 
-from decotrace import traced
+#from decotrace import traced
 from itsdangerous import Signer
 
 from . import db_manager
@@ -30,16 +30,18 @@ class UserManager(db_manager.CollectionManager):
     def check_login(self, username, password):
         user = self.collection.find_one({"username": username})
         if user is not None and self.check_passwords(password, user["password"]):
-            return user["_id"]
+            return user
         else:
             return None
 
     def create_user(self, username, password):
         if self.collection.find({"username": username}).count() == 0:
-            return self.collection.insert({
+            user = {
                 "username": username,
                 "password": self.hash_password(password),
-                })
+                }
+            self.collection.insert(user)
+            return user
         else:
             return None
 
